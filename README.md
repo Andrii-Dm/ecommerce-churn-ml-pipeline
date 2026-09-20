@@ -201,7 +201,6 @@ Response:
 Everything tunable lives in `config/settings.py`:
 
 ```python
-USE_GPU = True               # Toggle GPU acceleration for XGBoost/LightGBM/CatBoost
 FLAML_TIME_BUDGET = 300      # Seconds per experiment variant
 TOP_N_CATEGORIES = 10        # Product categories kept as explicit features
 WEIGHT_SWEEP_VALUES = [2, 4, 8, 12, 20, 30]   # Class weights to sweep over
