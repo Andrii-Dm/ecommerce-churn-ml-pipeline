@@ -101,24 +101,24 @@ The model confirms the econometric findings but additionally captures nonlinear 
 
 ### Structure
 
-```
 churn_predictor/
 ├── config/
-│   └── settings.py              # All paths, hyperparameters, and flags in one place
+│ └── settings.py # All paths, hyperparameters, and flags in one place
 ├── churn_predictor/
-│   ├── data/loader.py           # Loads and merges the 7 Olist CSV tables
-│   ├── features/engineering.py  # Feature engineering (training) + inference transform
-│   ├── models/trainer.py        # FLAML experiment suite, model selection, artifact saving
-│   └── analysis/eda.py          # EDA plots, logistic regression, permutation importance
+│ ├── data/loader.py # Loads and merges the 7 Olist CSV tables
+│ ├── features/engineering.py # Feature engineering (training) + inference transform
+│ ├── models/trainer.py # FLAML experiment suite, model selection, artifact saving
+│ └── analysis/eda.py # EDA plots, logistic regression, permutation importance
 ├── api/
-│   ├── main.py                  # FastAPI app
-│   ├── predictor.py             # Model loading and inference logic
-│   └── schemas.py               # Pydantic request/response models
+│ ├── main.py # FastAPI app
+│ ├── predictor.py # Model loading and inference logic
+│ └── schemas.py # Pydantic request/response models
 ├── scripts/
-│   └── train.py                 # CLI entry-point for the full training pipeline
+│ └── train.py # CLI entry-point for the full training pipeline
+├── Dockerfile
 └── tests/
-    └── test_predictor.py        # Schema, feature transform, and route tests
-```
+└── test_predictor.py # Schema, feature transform, and route tests
+
 
 ### Setup
 
@@ -127,18 +127,28 @@ pip install -r requirements.txt
 ```
 
 Place the Olist CSVs in a `data/` directory at the project root. The expected files are:
-```
-data/
-  olist_orders_dataset.csv
-  olist_order_items_dataset.csv
-  olist_customers_dataset.csv
-  olist_order_payments_dataset.csv
-  olist_order_reviews_dataset.csv
-  olist_products_dataset.csv
-  product_category_name_translation.csv
-```
 
-### Train
+data/
+olist_orders_dataset.csv
+olist_order_items_dataset.csv
+olist_customers_dataset.csv
+olist_order_payments_dataset.csv
+olist_order_reviews_dataset.csv
+olist_products_dataset.csv
+product_category_name_translation.csv
+
+
+### Pretrained Model Artifacts (skip training)
+
+Training runs FLAML's full search across multiple estimators and class-balancing strategies, which takes roughly 30–50 minutes depending on hardware. If you just want to run the API and try predictions, skip this entirely:
+
+1. Download `best_automl.pkl`, `scaler.pkl`, `feature_names.pkl`, and `top_cats.pkl` from [Releases → v1.0-model](https://github.com/Andrii-Dm/ecommerce-churn-ml-pipeline/releases/tag/v1.0-model)
+2. Place all four files in a `model_artifacts/` directory at the project root
+3. Skip straight to **Run the API** below
+
+These were trained on the Olist dataset as described above — no CSVs required if you're using these.
+
+### Train (optional — only if you want to retrain)
 
 ```bash
 python scripts/train.py
@@ -150,9 +160,20 @@ Artifacts are saved to `model_artifacts/`: the trained model, scaler, feature na
 
 ### Run the API
 
+**Locally:**
 ```bash
 uvicorn api.main:app --reload --port 8000
 ```
+
+**With Docker** (recommended — no local Python/dependency setup needed):
+```bash
+docker build -t churn-api .
+docker run -p 8000:8000 -v "${PWD}/model_artifacts:/app/model_artifacts" churn-api
+```
+
+The container expects `model_artifacts/` to exist on your host (either from training or the pretrained download above) and mounts it in at runtime — the model isn't baked into the image, so retraining or swapping the model never requires a rebuild.
+
+> On Windows PowerShell use `${PWD}`; on macOS/Linux use `$(pwd)`.
 
 ### Predict
 
