@@ -1,3 +1,4 @@
+[![CI](https://github.com/Andrii-Dm/ecommerce-churn-ml-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/Andrii-Dm/ecommerce-churn-ml-pipeline/actions/workflows/ci.yml)
 # Customer Churn Prediction in E-Commerce
 ### Microservice-based ML pipeline for predicting repeat purchase behavior
 
